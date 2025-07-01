@@ -1,4 +1,4 @@
-name: "Upload GitHub Action workflows logs to elastic"
+name: "Forward Actions workflows logs to Elastic"
 description: "Downloads the workflow logs and uploads to Elastic"
 author: "Shahar Glazner"
 inputs:
