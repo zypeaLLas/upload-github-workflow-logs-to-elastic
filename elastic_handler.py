@@ -67,7 +67,7 @@ class ElasticHandler(logging.Handler):
     def emit(self, record):
         try:
             es = elasticsearch.Elasticsearch(
-                [ELASTIC_HOST],
+                ELASTIC_HOST,
                 http_auth=(ELASTIC_USERNAME, ELASTIC_PASSWORD)
             )
             record_dict = record.__dict__
