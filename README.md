@@ -18,6 +18,7 @@ Everything should work if you configure your ES cluster and Workflow code right!
     elastic_index: "ci-cd"
 
 
-![image](https://github.com/user-attachments/assets/5f595315-966d-4578-a406-1078cb5dabee)
 
-![image](https://github.com/user-attachments/assets/37b0a178-3f32-48ac-9a5c-19f365786ac9)
+![upload_tomd1](https://github.com/user-attachments/assets/25db7129-7c81-46e4-8a98-5047e622fb3e)
+![upload_tomd2](https://github.com/user-attachments/assets/8bd9eacc-f92a-4973-adb6-dd4460502cbe)
+
