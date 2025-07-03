@@ -67,7 +67,7 @@ class ElasticHandler(logging.Handler):
     def emit(self, record):
         try:
             es = elasticsearch.Elasticsearch(
-                ELASTIC_HOST,
+                [ELASTIC_HOST],
                 http_auth=(ELASTIC_USERNAME, ELASTIC_PASSWORD)
             )
             record_dict = record.__dict__
@@ -88,22 +88,22 @@ class ElasticHandler(logging.Handler):
             ELASTIC_HOST,
             http_auth=(ELASTIC_USERNAME, ELASTIC_PASSWORD)
         )
-        # if the index is not exist, create it with mapping:
-        if not es.indices.exists(index=elastic_index):
-            print(es.info())
-            mapping = '''
-            {  
-              "mappings":{  
-                  "properties": {
-                    "@timestamp": {
-                      "type":   "date",
-                      "format": "epoch_millis"
-                    }
-                  }
-                }
-            }'''
-            es.indices.create(index=elastic_index, body=mapping)
-            print("indice:", es.indices)
+        # if the index is not exist, create it with mapping: -> bug
+        # if not es.indices.exists(index=elastic_index):
+        #     print(es.info())
+        #     mapping = '''
+        #     {  
+        #       "mappings":{  
+        #           "properties": {
+        #             "@timestamp": {
+        #               "type":   "date",
+        #               "format": "epoch_millis"
+        #             }
+        #           }
+        #         }
+        #     }'''
+        #     es.indices.create(index=elastic_index, body=mapping)
+        #     print("indice:", es.indices)
 
         #Bulking to Elasticsearch Cluster
         success, failure = bulk(
