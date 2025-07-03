@@ -4,7 +4,7 @@ Everything should work if you configure your ES cluster and Workflow code right!
 
 ```yaml
 - name: Forward Actions workflows logs to Elastic
-  uses: zypeaLLas/upload-github-workflow-logs-to-elastic@1.16.0
+  uses: zypeaLLas/upload-github-workflow-logs-to-elastic@1.0.0
   with:
     github_token: "${{ secrets.GITHUB }}"
     github_org: "yourOrg/User"
