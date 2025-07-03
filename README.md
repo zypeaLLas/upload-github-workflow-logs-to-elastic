@@ -16,3 +16,8 @@ Everything should work if you configure your ES cluster and Workflow code right!
     elastic_username: "${{ secrets.ELASTIC_USERNAME}}"
     elastic_password: "${{ secrets.ELASTIC_PASSWORD}}"
     elastic_index: "ci-cd"
+
+
+![image](https://github.com/user-attachments/assets/5f595315-966d-4578-a406-1078cb5dabee)
+
+![image](https://github.com/user-attachments/assets/37b0a178-3f32-48ac-9a5c-19f365786ac9)
