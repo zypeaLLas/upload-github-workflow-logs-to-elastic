@@ -19,6 +19,6 @@ Everything should work if you configure your ES cluster and Workflow code right!
 
 
 
-![upload_tomd1](upload_tomd1)
-![upload_tomd2](upload_tomd2)
+![upload_tomd1](upload_tomd1.png)
+![upload_tomd2](upload_tomd2.png)
 
