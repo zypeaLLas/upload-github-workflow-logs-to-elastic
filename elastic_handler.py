@@ -3,13 +3,12 @@ import logging
 import os
 import datetime
 import sys
-# third party
-import elasticsearch
+import elasticsearch 
 from elasticsearch.helpers import bulk
 
 ELASTIC_HOST = os.environ.get("INPUT_ELASTIC_HOST")
-ELASTIC_API_KEY_ID = os.environ.get("INPUT_ELASTIC_API_KEY_ID")
-ELASTIC_API_KEY = os.environ.get("INPUT_ELASTIC_API_KEY")
+ELASTIC_USERNAME = os.environ.get("INPUT_ELASTIC_USERNAME")
+ELASTIC_PASSWORD = os.environ.get("INPUT_ELASTIC_PASSWORD")
 ELASTIC_INDEX = os.environ.get("INPUT_ELASTIC_INDEX")
 
 try:
@@ -20,16 +19,16 @@ except:
     sys.exit(-1)
 
 try:
-    assert ELASTIC_API_KEY_ID not in (None, '')
+    assert ELASTIC_USERNAME not in (None, '')
 except:
-    output = "The input ELASTIC_API_KEY_ID is not set"
+    output = "The input ELASTIC_USERNAME is not set"
     print(f"Error: {output}")
     sys.exit(-1)
 
 try:
-    assert ELASTIC_API_KEY not in (None, '')
+    assert ELASTIC_PASSWORD not in (None, '')
 except:
-    output = "The input ELASTIC_API_KEY is not set"
+    output = "The input ELASTIC_PASSWORD is not set"
     print(f"Error: {output}")
     sys.exit(-1)
 
@@ -37,6 +36,8 @@ try:
     assert ELASTIC_INDEX not in (None, '')
     now = datetime.datetime.now()
     elastic_index = f"{ELASTIC_INDEX}-{now.month}-{now.day}"
+
+
 except:
     output = "The input ELASTIC_INDEX is not set"
     print(f"Error: {output}")
@@ -44,9 +45,14 @@ except:
 
 try:
     es = elasticsearch.Elasticsearch(
-        [ELASTIC_HOST],
-        api_key=(ELASTIC_API_KEY_ID, ELASTIC_API_KEY)
+        ELASTIC_HOST,
+        http_auth=(ELASTIC_USERNAME, ELASTIC_PASSWORD)
     )
+    if es.ping():
+        print("connected to Elasticsearch.")
+    if not es.ping():
+        print("Failed to connect to Elasticsearch.")
+
 except elasticsearch.exceptions.AuthorizationException as exc:
     output = "Authentication to elastic failed"
     print(f"Error: {output}")
@@ -54,13 +60,16 @@ except elasticsearch.exceptions.AuthorizationException as exc:
 
 
 class ElasticHandler(logging.Handler):
-
     def __init__(self, *args, **kwargs):
         super(ElasticHandler, self).__init__(*args, **kwargs)
         self.buffer = []
 
     def emit(self, record):
         try:
+            es = elasticsearch.Elasticsearch(
+                ELASTIC_HOST,
+                http_auth=(ELASTIC_USERNAME, ELASTIC_PASSWORD)
+            )
             record_dict = record.__dict__
             record_dict["@timestamp"] = int(record_dict.pop("created") * 1000)
             self.buffer.append({
@@ -74,8 +83,14 @@ class ElasticHandler(logging.Handler):
             return
 
     def flush(self):
+        print("it runs to flush.")
+        es = elasticsearch.Elasticsearch(
+            ELASTIC_HOST,
+            http_auth=(ELASTIC_USERNAME, ELASTIC_PASSWORD)
+        )
         # if the index is not exist, create it with mapping:
         if not es.indices.exists(index=elastic_index):
+            print(es.info())
             mapping = '''
             {  
               "mappings":{  
@@ -88,8 +103,20 @@ class ElasticHandler(logging.Handler):
                 }
             }'''
             es.indices.create(index=elastic_index, body=mapping)
-        # commit the logs to elastic
-        bulk(
+            print("indice:", es.indices)
+
+        #Bulking to Elasticsearch Cluster
+        success, failure = bulk(
             client=es,
             actions=self.buffer
         )
+        # Check if any failures occurred
+        if failure:
+            print(f"Bulk operation failed with {len(failure)} failures.")
+            for fail in failure:
+                print(f"Failure: {fail}")
+        else:
+            print("Bulk operation succeeded.")
+
+            print(f"Successfully indexed {success} logs to Elasticsearch.")
+        

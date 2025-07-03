@@ -3,11 +3,8 @@ import requests
 import io
 import logging
 import sys
-import signal
 import json
-# don't remove, it loads the configuration
 import logger
-
 
 def main():
     # User provided variables
@@ -95,9 +92,13 @@ def main():
     for job_id in jobs:
         try:
             job_logs_url = f"https://api.github.com/repos/{github_org}/{github_repo}/actions/jobs/{job_id}/logs"
-            r = requests.get(job_logs_url, stream=True, headers={
+            r = requests.get(job_logs_url,
+                             stream=True,
+                headers={
                 "Authorization": f"token {github_token}"
-            })
+                },
+                timeout=(10, 60)
+            )
             if not r.ok:
                 output = "Failed to download logs"
                 print(f"Error: {output}")
@@ -105,6 +106,8 @@ def main():
                 sys.exit(-1)
 
             logs = io.BytesIO(r.content)
+            # print("logs: " , logs.decode())
+            # elastic_logger.info(logs.decode())
             for log in logs:
                 elastic_logger.info(log.strip().decode(), extra={
                     "job_id": job_id,
@@ -113,7 +116,6 @@ def main():
                     "run_id": github_run_id,
                     **metadata
                 })
-
         except requests.exceptions.HTTPError as errh:
             output = "GITHUB API Http Error:" + str(errh)
             print(f"Error: {output}")
@@ -134,14 +136,6 @@ def main():
             print(f"Error: {output}")
             print(f"::set-output name=result::{output}")
             sys.exit(-1)
-
-
-def keyboard_interrupt_bug(signal, frame):
-    print('keyboard interrupt')
-    pass
-
-
-signal.signal(signal.SIGINT, keyboard_interrupt_bug)
 
 
 if __name__ == "__main__":
